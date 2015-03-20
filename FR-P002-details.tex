@@ -1,0 +1,86 @@
+
+\documentclass{article}
+
+\usepackage{amssymb} %chekmark symbol
+\usepackage{graphicx}
+
+\begin{document}
+
+
+%%%%%%%%%%%% PUBLICATIE ZOEKEN 
+\subsubsection*{PUBLICATIE ZOEKEN IN SKRIBL SYSTEEM EN OP INTERNET}
+\vspace{2 mm}
+
+\textbf{ID}: FR-P002
+\vspace{2 mm}
+
+
+\noindent Deze feature bestaat uit twee scenario's: een BASIC search en een ADVANCED search. Bij een basic search wordt er door de gebruiker een enkele string ingegeven, waarna in de database op een bepaald aantal keys wordt gezocht en via GS wordt er een standaard scraping gedaan. Bij een advanced search geeft de gebruiker afzonderlijk titel, jaar, journal e.d. in, waarna in de database bijhorende queries worden uitgevoerd. Via Gs wordt dan een advanced search uitgevoerd. 
+\\
+\\
+zie volgende pagina's
+
+\begin{figure}[h]
+    \includegraphics[width = 16cm]{basic-advanced-search.png}
+\end{figure}
+
+\clearpage
+
+\hrule
+\vspace{2 mm}
+\noindent \textbf{Scenario}:
+\begin{description}
+\item CLIENT : G wil publicatie zoeken om eventueel toe te voegen aan bibliotheek, e.g. gebruiker is in 'PORTFOLIO' en klikt op publicatie zoeken  
+	\begin{description}
+	\item \checkmark validatie gegeven input (afhankelijk van advanced of basic search)
+	\item $\rightarrow$ basic: PUT: string  
+	\item $\rightarrow$ advanced: PUT: JSON  
+	\end{description}
+	
+\item SERVER : 
+	\begin{description}
+	\item \checkmark validatie
+	\item $\leftarrow$ gevonden resultaten: JSON met
+		\begin{description}
+		\item resultaten van google scholar: max 10 JSON metadata (\emph{overleg met front})
+		\item resultaten van skribl: publicatie ID + titel; via ID kan later metadata opgevraagd worden aan server om deze weer te geven. Voor een basic search zijn deze resultaten van een (partial) match in de database met:
+			\begin{description}
+			\item auteur
+			\item titel
+			\item journal of proceeding
+			\item keywords
+			\item (universiteit)
+			\end{description}
+		\end{description}
+	\end{description}
+	
+\item CLIENT :  G ziet een lijst van resultaten (titel van de publicaties) en kan een publicatie aanklikken om meer informatie te zien 
+	\begin{description}
+	\item $\rightarrow$ indien SKRIBL resultaat POST: ID om metadata van server te krijgen  
+	\item pop-up of side menu preview van metadata 
+	\end{description}
+	
+\item CLIENT :  G wil publicatie toevoegen aan bibliotheek
+	\begin{description}
+	\item !!!!!   indien GS resultaat: metadata moet manueel aangevuld worden op zelfde manier als bij publicatie uploaden met bijhorende requests en validaties
+	\item POST: metadata + ID (SKRIBL) of URL (GS) 
+	\end{description}
+	
+\item SERVER : GS result: downloaden van publicatie via URL en toevoegen aan database
+	\begin{description}
+	\item $\leftarrow$ :  ...
+	\end{description}
+		
+\item CLIENT :  message: publicatie toegevoegd aan huidige bibliotheek.
+
+ \end{description}
+ 
+
+
+
+\end{document}
+
+
+
+
+
