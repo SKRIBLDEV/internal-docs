@@ -1,0 +1,120 @@
+
+\documentclass{article}
+
+\usepackage{amssymb} %chekmark symbol
+
+\begin{document}
+
+
+%%%%%%%%%%%% PUBLICATIE UPLOADEN 
+\subsubsection*{PUBLICATIE UPLOADEN VANUIT EIGEN FILESYSTEM}
+\vspace{2 mm}
+
+\textbf{ID}: FR-P001
+\vspace{2 mm}
+
+
+
+\hrule
+\vspace{2 mm}
+\noindent \textbf{Scenario}:
+\begin{description}
+\item CLIENT : G voegt bestand uit eigen filesystem toe, geeft bestand + titel + type (journal of proceeding), vertrekkend vanuit bepaalde bibliotheek
+	\begin{description}
+	\item \checkmark PDF file ? 
+	\item $\rightarrow$ PUT: PDF + titel + type 
+	\end{description}
+	
+\item SERVER : 
+	\begin{description}
+	\item \checkmark PDF file?
+	\item \checkmark bestaat titel al? 
+	\item $\leftarrow$ publication ID + status 
+		\begin{description}
+		\item status 200: publicatie bestond nog niet, continue 
+		\item status 206: titel al aanwezig, request body bevat metadata publicatie  $\hookrightarrow$ A
+		\end{description}
+	\end{description}
+	
+\item CLIENT :  G wil metadata automatisch laten aanvullen
+	\begin{description}
+	\item $\rightarrow$ PUT:  titel  + type
+	\end{description}
+	
+\item SERVER :  google scholar (GS) scraping
+	\begin{description}
+	\item $\leftarrow$ :    GS metadata voor type
+	\end{description}
+	
+\item CLIENT :  G kan metadata manueel vervolledigen 
+	\begin{description}
+ 	\item[titel * ]  \hfill 
+  	\item[auteurs * ] \hfill 
+  	\item[indien journal: naam/volume/nummer *] \hfill 
+  	\item[indien proceeding: naam/organisatie *] \hfill 
+  	\item[jaar van publicatie * ] \hfill 
+  	\item[onderzoeksdomeinen *]  \hfill 
+  	\item[keywords * ]  \hfill 
+  	\item[abstract] \hfill 
+   	\item[aantal citaties] \hfill 
+    	\item[URL] \hfill 
+  	\end{description}
+	
+	\begin{description}
+	\item \checkmark validatie
+	\item $\rightarrow$ PUT:  metadata
+	\end{description}
+	
+\item SERVER :  
+	\begin{description}
+	\item \checkmark validatie
+	\item \checkmark zijn auteurs al bekend in systeem? (dit gaat niet enkel over gebruikers = auteurs die ook een account hebben)
+	\item $\leftarrow$ :   status
+			\begin{description}
+			\item status 200: auteur nog niet bekend, continue 
+			\item status 206: auteur al aanwezig, request body bevat JSON met de titels van maximaal vijf publicaties van de auteur ( ! per gevonden auteur, kunnen er meerdere zijn )   $\hookrightarrow$ B
+			\end{description}
+	\end{description}
+	
+\item CLIENT :  message: publicatie toegevoegd aan huidige bibliotheek.
+
+ \end{description}
+ 
+ 
+\vspace{2 mm}
+\hrule
+\vspace{2 mm}
+ 
+\noindent Alternatieve scenario's: 
+
+\begin{description}
+
+\item A: de titel van de publicatie komt al voor in ons systeem. 
+ 	\begin{description}
+ 	\item CLIENT : haalt metadata van publicatie uit request body en geeft deze weer aan gebruiker
+ 		\begin{description}
+		\item vraag aan gebruiker:  \emph{'is this the publication you are looking for'?}. 
+		\item indien ja:  $\rightarrow$ PUT:  ...? 
+		\item indien nee: continue
+		\end{description}
+  	\end{description}
+\item B:  auteur(s) zijn al bekend in ons systeem
+ 	\begin{description}
+ 	\item CLIENT : haalt per gevonden auteur een lijst met publicatie titels uit request body en geeft weer. Gebruiker kan aan de hand van titels oordelen of het over de correcte auteur gaat. 
+ 		\begin{description}
+		\item vraag aan gebruiker:  \emph{'is this the author you are looking for'?}. 
+		\item indien ja:  $\rightarrow$ PUT:  ...? 
+		\item indien nee: continue
+		\end{description}
+  	\end{description}
+  
+ \end{description}
+
+
+
+\end{document}
+
+
+
+
+
