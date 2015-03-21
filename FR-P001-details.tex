@@ -5,6 +5,10 @@
 
 \begin{document}
 
+\date{versie 21 maart 2015}
+\title{low-level scenario FR-P001}
+\maketitle
+
 
 %%%%%%%%%%%% PUBLICATIE UPLOADEN 
 \subsubsection*{PUBLICATIE UPLOADEN VANUIT EIGEN FILESYSTEM}
@@ -19,61 +23,91 @@
 \vspace{2 mm}
 \noindent \textbf{Scenario}:
 \begin{description}
-\item CLIENT : G voegt bestand uit eigen filesystem toe, geeft bestand + titel + type (journal of proceeding), vertrekkend vanuit bepaalde bibliotheek
+\item CLIENT : G voegt bestand uit eigen filesystem toe, geeft bestand + titel + type (journal of proceeding), vertrekkend vanuit bepaalde bibliotheek. Eerst wordt gecontroleerd of publicatie met die titel reeds aanwezig is. Indien een publicatie met dezelfde titel al aanwezig is, is het aan de gebruiker om te oordelen of het over dezelfde publicatie gaat. 
 	\begin{description}
-	\item \checkmark PDF file ? 
-	\item $\rightarrow$ PUT: PDF + titel + type 
+	\item $\rightarrow$ GET /publications (internal advanced search on title)
 	\end{description}
 	
 \item SERVER : 
 	\begin{description}
+	\item $\leftarrow$ publicationArray with matched publications
+	\end{description}
+	 
+\item CLIENT : 
+	\begin{description}
+	\item lege array, publicatie nog niet aanwezig, continue
+	\item titel al aanwezig $\hookrightarrow$ A
+	\end{description}
+
+\item CLIENT : publicatie uploaden 
+	\begin{description}
 	\item \checkmark PDF file?
-	\item \checkmark bestaat titel al? 
-	\item $\leftarrow$ publication ID + status 
-		\begin{description}
-		\item status 200: publicatie bestond nog niet, continue 
-		\item status 206: titel al aanwezig, request body bevat metadata publicatie  $\hookrightarrow$ A
-		\end{description}
+	\item $\rightarrow$ PUT /publications
+	\end{description}
+	
+\item SERVER : 
+\begin{description}
+	\item \checkmark validatie
+	\item $\leftarrow$ pubID
 	\end{description}
 	
 \item CLIENT :  G wil metadata automatisch laten aanvullen
 	\begin{description}
-	\item $\rightarrow$ PUT:  titel  + type
+	\item $\rightarrow$  POST /publications/<pub-id> met extract=true
 	\end{description}
 	
 \item SERVER :  google scholar (GS) scraping
 	\begin{description}
-	\item $\leftarrow$ :    GS metadata voor type
+	\item $\leftarrow$  GS metadata voor type proceeding of journal
 	\end{description}
 	
 \item CLIENT :  G kan metadata manueel vervolledigen 
 	\begin{description}
- 	\item[titel * ]  \hfill 
-  	\item[auteurs * ] \hfill 
-  	\item[indien journal: naam/volume/nummer *] \hfill 
-  	\item[indien proceeding: naam/organisatie *] \hfill 
-  	\item[jaar van publicatie * ] \hfill 
-  	\item[onderzoeksdomeinen *]  \hfill 
-  	\item[keywords * ]  \hfill 
+ 	\item[title * ]  \hfill 
+  	\item[authors * ] \hfill 
+	\item[year * ] \hfill 
+	\item[indien journal article : journal/publisher/volume/number *] \hfill 
+  	\item[indien proceeding: booktitle/organisation *] \hfill 
+	\item[research domains*] uit een lijst! \hfill 
+	\item[keywords * ]  \hfill 
   	\item[abstract] \hfill 
-   	\item[aantal citaties] \hfill 
+   	\item[citations] \hfill 
     	\item[URL] \hfill 
+	\item[private?]
   	\end{description}
 	
 	\begin{description}
 	\item \checkmark validatie
-	\item $\rightarrow$ PUT:  metadata
+	\item $\rightarrow$ POST /publications/<pub-id> met extract=true
 	\end{description}
 	
+\item CLIENT: check of ingevoerde auteurs al in systeem aanwezig zijn  (eventueel van zodra dit veld is ingevuld)
+	\begin{description}
+	\item $\rightarrow$  GET /authors
+	\end{description}
+	
+\item SERVER 
+	\begin{description}
+	\item $\leftarrow$ JSON-array van max. 5 gematchte auteurs en max. 5 publicaties (pubID + title) per auteur 
+	\end{description}
+	
+\item CLIENT 
+	\begin{description}
+	\item geen auteurs al aanwezig in systeem, continue 
+	\item een of meerdere auteurs al aanwezig in systeem $\hookrightarrow$ B
+	\end{description}
+	
+	
+\item CLIENT : finale metadata doorvoeren 
+	\begin{description}
+	\item $\rightarrow$ POST /publications/<pub-id> met extract=true
+	\end{description}
+
+
 \item SERVER :  
 	\begin{description}
 	\item \checkmark validatie
-	\item \checkmark zijn auteurs al bekend in systeem? (dit gaat niet enkel over gebruikers = auteurs die ook een account hebben)
-	\item $\leftarrow$ :   status
-			\begin{description}
-			\item status 200: auteur nog niet bekend, continue 
-			\item status 206: auteur al aanwezig, request body bevat JSON met de titels van maximaal vijf publicaties van de auteur ( ! per gevonden auteur, kunnen er meerdere zijn )   $\hookrightarrow$ B
-			\end{description}
+	\item $\leftarrow$ status 
 	\end{description}
 	
 \item CLIENT :  message: publicatie toegevoegd aan huidige bibliotheek.
@@ -91,20 +125,20 @@
 
 \item A: de titel van de publicatie komt al voor in ons systeem. 
  	\begin{description}
- 	\item CLIENT : haalt metadata van publicatie uit request body en geeft deze weer aan gebruiker
+ 	\item CLIENT : haalt titel van publicatie(s) uit request body en geeft deze weer aan gebruiker
  		\begin{description}
 		\item vraag aan gebruiker:  \emph{'is this the publication you are looking for'?}. 
-		\item indien ja:  $\rightarrow$ PUT:  ...? 
+		\item indien ja:  $\rightarrow$ PUT /user/<username>/library/<libraryname>/<publication-id>
 		\item indien nee: continue
 		\end{description}
   	\end{description}
 \item B:  auteur(s) zijn al bekend in ons systeem
  	\begin{description}
- 	\item CLIENT : haalt per gevonden auteur een lijst met publicatie titels uit request body en geeft weer. Gebruiker kan aan de hand van titels oordelen of het over de correcte auteur gaat. 
+ 	\item CLIENT : haalt per gevonden auteur een lijst met publicatie titels uit result en geeft weer. Gebruiker kan aan de hand van titels oordelen of het over de correcte auteur gaat. 
  		\begin{description}
 		\item vraag aan gebruiker:  \emph{'is this the author you are looking for'?}. 
-		\item indien ja:  $\rightarrow$ PUT:  ...? 
-		\item indien nee: continue
+		\item indien ja:  $\rightarrow$ in metadata object moet de auteur in kwestie uit 'authors' verdwijnen en als ID in 'known-authors' blijven. Op deze manier wordt deze niet als nieuwe auteur toegevoegd. Continue.
+		\item indien nee: $\rightarrow$ in metadata object moet de auteur in kwestie in 'authors' komen en de ID moet uit 'known-authors' verdwijnen. Continue. 
 		\end{description}
   	\end{description}
   
