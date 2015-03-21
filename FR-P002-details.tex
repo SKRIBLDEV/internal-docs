@@ -6,6 +6,10 @@
 
 \begin{document}
 
+\date{versie 21 maart 2015}
+\title{low-level scenario FR-P002}
+\maketitle
+
 
 %%%%%%%%%%%% PUBLICATIE ZOEKEN 
 \subsubsection*{PUBLICATIE ZOEKEN IN SKRIBL SYSTEEM EN OP INTERNET}
@@ -15,14 +19,15 @@
 \vspace{2 mm}
 
 
-\noindent Deze feature bestaat uit twee scenario's: een BASIC search en een ADVANCED search. Bij een basic search wordt er door de gebruiker een enkele string ingegeven, waarna in de database op een bepaald aantal keys wordt gezocht en via GS wordt er een standaard scraping gedaan. Bij een advanced search geeft de gebruiker afzonderlijk titel, jaar, journal e.d. in, waarna in de database bijhorende queries worden uitgevoerd. Via Gs wordt dan een advanced search uitgevoerd. 
+\noindent Deze feature bestaat uit twee scenario's: een BASIC search en een ADVANCED search. Bij een basic search wordt er door de gebruiker een enkele string ingegeven, waarna in de database op een bepaald aantal keys wordt gezocht en via GS wordt er een standaard scraping gedaan. Bij een advanced search geeft de gebruiker afzonderlijk titel, jaar, journal e.d. in, waarna in de database bijhorende queries worden uitgevoerd. (Via GS wordt er GEEN advanced search uitgevoerd, dit is enkel mogelijk via dynamische scraping)
 \\
 \\
 zie volgende pagina's
 
-\begin{figure}[h]
-    \includegraphics[width = 16cm]{basic-advanced-search.png}
-\end{figure}
+\includegraphics[width=1.3\textwidth]{basic-advanced-search.png}
+
+    
+
 
 \clearpage
 
@@ -33,8 +38,7 @@ zie volgende pagina's
 \item CLIENT : G wil publicatie zoeken om eventueel toe te voegen aan bibliotheek, e.g. gebruiker is in 'PORTFOLIO' en klikt op publicatie zoeken  
 	\begin{description}
 	\item \checkmark validatie gegeven input (afhankelijk van advanced of basic search)
-	\item $\rightarrow$ basic: PUT: string  
-	\item $\rightarrow$ advanced: PUT: JSON  
+	\item $\rightarrow$ GET /publications 
 	\end{description}
 	
 \item SERVER : 
@@ -56,28 +60,25 @@ zie volgende pagina's
 	
 \item CLIENT :  G ziet een lijst van resultaten (titel van de publicaties) en kan een publicatie aanklikken om meer informatie te zien 
 	\begin{description}
-	\item $\rightarrow$ indien SKRIBL resultaat POST: ID om metadata van server te krijgen  
+	\item $\rightarrow$ indien SKRIBL resultaat: GET /publications/<pub-id>, voor GS resultaat metadata reeds aanwezig na vorige request (\emph{overleg met front})
 	\item pop-up of side menu preview van metadata 
 	\end{description}
 	
 \item CLIENT :  G wil publicatie toevoegen aan bibliotheek
 	\begin{description}
-	\item !!!!!   indien GS resultaat: metadata moet manueel aangevuld worden op zelfde manier als bij publicatie uploaden met bijhorende requests en validaties
-	\item POST: metadata + ID (SKRIBL) of URL (GS) 
+	\item !!!!!   indien GS resultaat: 
+		\begin{description}
+		\item metadata moet manueel aangevuld worden op zelfde manier als bij publicatie uploaden met bijhorende requests en validaties, checken of publicatie al in Sribl systeem zit, checken of auteurs al in systeem zitten ed. 
+		\item dus eerste een PUT /publications met de gevonden URL; server zal de publicatie proberen downloaden 
+		\item daarna POST /publications/<pub-id> zoals in FR-P001
+		\end{description}
+	\item SKRIBL resultaat $\rightarrow$ PUT /user/<username>/library/<libraryname>/<publication-id>
 	\end{description}
-	
-\item SERVER : GS result: downloaden van publicatie via URL en toevoegen aan database
-	\begin{description}
-	\item $\leftarrow$ :  ...
-	\end{description}
-		
+			
 \item CLIENT :  message: publicatie toegevoegd aan huidige bibliotheek.
 
  \end{description}
  
-
-
-
 \end{document}
 
 
