@@ -6,7 +6,7 @@
 
 \begin{document}
 
-\date{versie 21 maart 2015}
+\date{versie 22 maart 2015}
 \title{low-level scenario FR-P002}
 \maketitle
 
@@ -69,6 +69,7 @@ zie volgende pagina's
 	\item !!!!!   indien GS resultaat: 
 		\begin{description}
 		\item metadata moet manueel aangevuld worden op zelfde manier als bij publicatie uploaden met bijhorende requests en validaties, checken of publicatie al in Sribl systeem zit, checken of auteurs al in systeem zitten ed. 
+		\item bovendien is het niet af te leiden uit een GS resultaat of het over een proceeding of een journal article gaat -> voorlopig heeft het metadata object dat je terug krijgt de properties 'journalOrBookTitle'  ipv journal (journal) en booktitle(proceeding); en 'publisherOrOrganisation' ipv... . De gebruiker moet voor het toevoegen aangeven of het over een journal of proceeding gaat, en dan moeten de properties in orde komen.  
 		\item dus eerste een PUT /publications met de gevonden URL; server zal de publicatie proberen downloaden 
 		\item daarna POST /publications/<pub-id> zoals in FR-P001
 		\end{description}
